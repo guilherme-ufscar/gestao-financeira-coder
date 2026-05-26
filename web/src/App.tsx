@@ -13,6 +13,9 @@ import More from './pages/app/More';
 import AccountsList from './pages/app/accounts/AccountsList';
 import CardsList from './pages/app/cards/CardsList';
 import NewTransaction from './pages/app/NewTransaction';
+import SubscriptionsList from './pages/app/subscriptions/SubscriptionsList';
+import InvestmentsList from './pages/app/investments/InvestmentsList';
+import BudgetPage from './pages/app/budget/BudgetPage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -44,6 +47,9 @@ export default function App() {
         <Route path="/mais" element={<More />} />
         <Route path="/contas" element={<AccountsList />} />
         <Route path="/cartoes" element={<CardsList />} />
+        <Route path="/assinaturas" element={<SubscriptionsList />} />
+        <Route path="/investimentos" element={<InvestmentsList />} />
+        <Route path="/metas" element={<BudgetPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

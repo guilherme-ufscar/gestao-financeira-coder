@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useAuthStore } from '../../lib/store/auth';
 import api from '../../lib/api/client';
+import Turnstile from '../../components/ui/Turnstile';
 
 const schema = z.object({
   name: z.string().min(2, 'Minimo 2 caracteres'),
@@ -30,11 +31,6 @@ export default function Register() {
   const onTurnstileSuccess = useCallback((token: string) => {
     setTurnstileToken(token);
   }, []);
-
-  useEffect(() => {
-    (window as any).onTurnstileSuccess = onTurnstileSuccess;
-    return () => { delete (window as any).onTurnstileSuccess; };
-  }, [onTurnstileSuccess]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -127,13 +123,7 @@ export default function Register() {
           {errors.confirmPassword && <p className="text-danger text-xs mt-1">{errors.confirmPassword.message}</p>}
         </div>
 
-        <div id="turnstile-container" className="flex justify-center">
-          <div
-            className="cf-turnstile"
-            data-sitekey="0x4AAAAAADWxcIYnIuEowhAf"
-            data-callback="onTurnstileSuccess"
-          ></div>
-        </div>
+        <Turnstile onSuccess={onTurnstileSuccess} />
 
         <button
           type="submit"

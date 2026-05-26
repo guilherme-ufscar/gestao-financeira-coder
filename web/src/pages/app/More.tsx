@@ -9,9 +9,11 @@ import {
   Users,
   Settings,
   LogOut,
+  Building2,
 } from 'lucide-react';
 
 const menuItems = [
+  { icon: Building2, label: 'Contas', path: '/contas' },
   { icon: CreditCard, label: 'Cartoes', path: '/cartoes' },
   { icon: Repeat, label: 'Assinaturas', path: '/assinaturas' },
   { icon: TrendingUp, label: 'Investimentos', path: '/investimentos' },

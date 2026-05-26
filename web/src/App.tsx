@@ -10,6 +10,9 @@ import Dashboard from './pages/app/Dashboard';
 import Transactions from './pages/app/Transactions';
 import Calendar from './pages/app/Calendar';
 import More from './pages/app/More';
+import AccountsList from './pages/app/accounts/AccountsList';
+import CardsList from './pages/app/cards/CardsList';
+import NewTransaction from './pages/app/NewTransaction';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -36,8 +39,11 @@ export default function App() {
       <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/transacoes" element={<Transactions />} />
+        <Route path="/lancamento" element={<NewTransaction />} />
         <Route path="/calendario" element={<Calendar />} />
         <Route path="/mais" element={<More />} />
+        <Route path="/contas" element={<AccountsList />} />
+        <Route path="/cartoes" element={<CardsList />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

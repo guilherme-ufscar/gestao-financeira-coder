@@ -81,8 +81,8 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "10206:443"
-      - "10207:80"
+      - "10206:80"
+      - "10207:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /www/server/panel/vhost/cert/gestaofinanceira.codermaster.com.br:/etc/ssl/certs:ro

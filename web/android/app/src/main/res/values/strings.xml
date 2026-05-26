@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Cofrin</string>
+    <string name="title_activity_main">Cofrin</string>
+    <string name="package_name">com.codermaster.cofrin</string>
+    <string name="custom_url_scheme">com.codermaster.cofrin</string>
+</resources>

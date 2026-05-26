@@ -1,0 +1,27 @@
+{
+  "name": "cofrin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cofrin - Gestão Financeira Pessoal e Familiar",
+  "workspaces": [
+    "web",
+    "server",
+    "worker"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=web",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:worker": "npm run dev --workspace=worker",
+    "build:web": "npm run build --workspace=web",
+    "build:server": "npm run build --workspace=server",
+    "build:worker": "npm run build --workspace=worker",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:generate": "npm run db:generate --workspace=server",
+    "db:migrate": "npm run db:migrate --workspace=server",
+    "db:push": "npm run db:push --workspace=server"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,395 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  name          String
+  avatarUrl     String?
+  theme         String   @default("auto")
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts      Account[]
+  creditCards   CreditCard[]
+  categories    Category[]
+  transactions  Transaction[]
+  subscriptions Subscription[]
+  investments   Investment[]
+  budgets       Budget[]
+  goals         Goal[]
+  debts         Debt[]
+  notifications Notification[]
+  pushSubscriptions PushSubscription[]
+  circleMembers CircleMember[]
+  ownedCircles  FamilyCircle[]
+  refreshTokens RefreshToken[]
+  passwordResets PasswordReset[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Account {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  type            String
+  bankSlug        String?
+  color           String   @default("#6D5FFD")
+  balanceInCents  Int      @default(0)
+  yieldsEnabled   Boolean  @default(false)
+  yieldRatePercent Float?
+  yieldType       String?
+  yieldCapInCents Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  transactions    Transaction[]
+  transfersFrom   Transfer[] @relation("TransferFrom")
+  transfersTo     Transfer[] @relation("TransferTo")
+  invoicePayments Invoice[]
+  yieldEntries    YieldEntry[]
+  subscriptions   Subscription[]
+  creditCards     CreditCard[]
+
+  @@index([userId])
+}
+
+model CreditCard {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  brand           String
+  lastFourDigits  String
+  limitInCents    Int
+  closingDay      Int
+  dueDay          Int
+  paymentAccountId String?
+  paymentAccount  Account? @relation(fields: [paymentAccountId], references: [id], onDelete: SetNull)
+  color           String   @default("#4F7DFF")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  transactions    Transaction[]
+  invoices        Invoice[]
+
+  @@index([userId])
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  creditCardId  String
+  creditCard    CreditCard @relation(fields: [creditCardId], references: [id], onDelete: Cascade)
+  month         Int
+  year          Int
+  totalInCents  Int      @default(0)
+  status        String   @default("open")
+  paidAt        DateTime?
+  paidAccountId String?
+  paidAccount   Account? @relation(fields: [paidAccountId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  installments  Installment[]
+
+  @@unique([creditCardId, month, year])
+  @@index([creditCardId])
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  icon      String
+  color     String
+  type      String
+  parentId  String?
+  parent    Category? @relation("SubCategories", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[] @relation("SubCategories")
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  transactions  Transaction[]
+  subscriptions Subscription[]
+  budgets       Budget[]
+
+  @@index([userId])
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String
+  amountInCents Int
+  description   String
+  date          DateTime
+  status        String   @default("pending")
+  note          String?
+  accountId     String?
+  account       Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  creditCardId  String?
+  creditCard    CreditCard? @relation(fields: [creditCardId], references: [id], onDelete: SetNull)
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  recurringRuleId String?
+  recurringRule RecurringRule? @relation(fields: [recurringRuleId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  installments  Installment[]
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([creditCardId])
+  @@index([date])
+}
+
+model Installment {
+  id              String   @id @default(uuid())
+  transactionId   String
+  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  invoiceId       String?
+  invoice         Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  number          Int
+  totalCount      Int
+  amountInCents   Int
+  dueDate         DateTime
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+
+  @@index([transactionId])
+  @@index([invoiceId])
+}
+
+model RecurringRule {
+  id            String   @id @default(uuid())
+  frequency     String
+  interval      Int      @default(1)
+  nextOccurrence DateTime
+  endDate       DateTime?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transactions  Transaction[]
+}
+
+model Transfer {
+  id              String   @id @default(uuid())
+  fromAccountId   String
+  fromAccount     Account  @relation("TransferFrom", fields: [fromAccountId], references: [id], onDelete: Cascade)
+  toAccountId     String
+  toAccount       Account  @relation("TransferTo", fields: [toAccountId], references: [id], onDelete: Cascade)
+  amountInCents   Int
+  date            DateTime
+  note            String?
+  createdAt       DateTime @default(now())
+
+  @@index([fromAccountId])
+  @@index([toAccountId])
+}
+
+model Subscription {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  logoUrl       String?
+  amountInCents Int
+  cycle         String
+  billingDay    Int
+  accountId     String?
+  account       Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  active        Boolean  @default(true)
+  nextBillingDate DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Investment {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String
+  name            String
+  ticker          String?
+  amountInCents   Int
+  currentValueInCents Int
+  yieldRatePercent Float?
+  yieldType       String?
+  startDate       DateTime
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Budget {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  month         Int
+  year          Int
+  limitInCents  Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, categoryId, month, year])
+  @@index([userId])
+}
+
+model Goal {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  targetInCents   Int
+  currentInCents  Int      @default(0)
+  deadline        DateTime?
+  color           String   @default("#6D5FFD")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Debt {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  description     String
+  totalInCents    Int
+  remainingInCents Int
+  creditor        String?
+  dueDate         DateTime?
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model YieldEntry {
+  id            String   @id @default(uuid())
+  accountId     String
+  account       Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  amountInCents Int
+  date          DateTime
+  createdAt     DateTime @default(now())
+
+  @@index([accountId])
+  @@index([date])
+}
+
+model FamilyCircle {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   CircleMember[]
+  invites   CircleInvite[]
+
+  @@index([ownerId])
+}
+
+model CircleMember {
+  id          String   @id @default(uuid())
+  circleId    String
+  circle      FamilyCircle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String   @default("member")
+  shareAccounts Boolean @default(true)
+  shareCards    Boolean @default(true)
+  shareInvestments Boolean @default(false)
+  joinedAt    DateTime @default(now())
+
+  @@unique([circleId, userId])
+  @@index([circleId])
+  @@index([userId])
+}
+
+model CircleInvite {
+  id        String   @id @default(uuid())
+  circleId  String
+  circle    FamilyCircle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  email     String
+  status    String   @default("pending")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([circleId])
+  @@index([email])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  data      String?
+  channel   String
+  read      Boolean  @default(false)
+  sentAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([sentAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  platform  String   @default("web")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}

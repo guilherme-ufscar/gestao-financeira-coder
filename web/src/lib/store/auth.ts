@@ -13,9 +13,11 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  biometricEnabled: boolean;
   setAuth: (user: User, token: string) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
+  setBiometric: (enabled: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -24,12 +26,14 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      biometricEnabled: false,
       setAuth: (user, token) => set({ user, token, isAuthenticated: true }),
       logout: () => set({ user: null, token: null, isAuthenticated: false }),
       updateUser: (data) =>
         set((state) => ({
           user: state.user ? { ...state.user, ...data } : null,
         })),
+      setBiometric: (enabled) => set({ biometricEnabled: enabled }),
     }),
     { name: 'cofrin-auth' }
   )

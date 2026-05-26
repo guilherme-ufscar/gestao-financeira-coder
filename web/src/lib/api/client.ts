@@ -1,8 +1,13 @@
 import axios from 'axios';
+import { Capacitor } from '@capacitor/core';
 import { useAuthStore } from '../store/auth';
 
+const API_URL = Capacitor.isNativePlatform()
+  ? 'https://gestaofinanceira.codermaster.com.br/api'
+  : '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
@@ -22,7 +27,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+        const { data } = await axios.post(API_URL + '/auth/refresh', {}, { withCredentials: true });
         useAuthStore.getState().setAuth(data.user, data.token);
         originalRequest.headers.Authorization = 'Bearer ' + data.token;
         return api(originalRequest);

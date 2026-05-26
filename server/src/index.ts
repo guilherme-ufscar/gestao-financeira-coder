@@ -22,7 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = Fastify({ logger: true });
 
 await app.register(cors, {
-  origin: process.env.APP_URL || 'http://localhost:5173',
+  origin: true,
   credentials: true,
 });
 

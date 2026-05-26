@@ -121,6 +121,7 @@ export async function authRoutes(app: FastifyInstance) {
     return {
       user: { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl, theme: user.theme },
       token: accessToken,
+      refreshToken,
     };
   });
 
@@ -219,6 +220,49 @@ export async function authRoutes(app: FastifyInstance) {
     });
 
     return { message: 'Senha redefinida com sucesso' };
+  });
+
+  app.post('/refresh-biometric', async (request, reply) => {
+    const schema = z.object({
+      email: z.string().email(),
+      refreshToken: z.string(),
+    });
+
+    const body = schema.parse(request.body);
+
+    try {
+      const stored = await prisma.refreshToken.findUnique({ where: { token: body.refreshToken } });
+      if (!stored || stored.expiresAt < new Date()) {
+        return reply.status(401).send({ message: 'Token invalido' });
+      }
+
+      const user = await prisma.user.findUnique({ where: { id: stored.userId } });
+      if (!user || user.email !== body.email) {
+        return reply.status(401).send({ message: 'Credenciais invalidas' });
+      }
+
+      await prisma.refreshToken.delete({ where: { id: stored.id } });
+
+      const newPayload = { userId: user.id, email: user.email };
+      const newAccessToken = signAccessToken(newPayload);
+      const newRefreshToken = signRefreshToken(newPayload);
+
+      await prisma.refreshToken.create({
+        data: {
+          token: newRefreshToken,
+          userId: user.id,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      return {
+        user: { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl, theme: user.theme },
+        token: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch {
+      return reply.status(401).send({ message: 'Token invalido' });
+    }
   });
 
   app.post('/logout', { preHandler: [authenticate] }, async (request, reply) => {

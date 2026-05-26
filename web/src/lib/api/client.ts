@@ -2,14 +2,17 @@ import axios from 'axios';
 import { Capacitor } from '@capacitor/core';
 import { useAuthStore } from '../store/auth';
 
-const API_URL = Capacitor.isNativePlatform()
-  ? 'https://gestaofinanceira.codermaster.com.br/api'
+const isNative = Capacitor.isNativePlatform();
+const API_URL = isNative
+  ? 'http://66.94.105.155:10206/api'
   : '/api';
+
+console.log('[Cofrin] API_URL:', API_URL, 'isNative:', isNative);
 
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true,
+  withCredentials: !isNative,
 });
 
 api.interceptors.request.use((config) => {

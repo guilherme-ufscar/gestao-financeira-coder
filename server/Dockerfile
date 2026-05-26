@@ -4,22 +4,21 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json package-lock.json* ./
 COPY server/package.json ./server/
-RUN npm ci --workspace=server
+COPY worker/package.json ./worker/
+COPY web/package.json ./web/
+RUN npm ci
 
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/server/node_modules ./server/node_modules
 COPY server/ ./server/
 WORKDIR /app/server
 RUN npx prisma generate
-RUN npm run build
+RUN npx tsc
 
 FROM base AS production
 WORKDIR /app/server
 COPY --from=build /app/server/dist ./dist
-COPY --from=build /app/server/node_modules ./node_modules
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=build /app/node_modules ./node_modules
 COPY server/prisma ./prisma
 COPY server/package.json ./package.json
 

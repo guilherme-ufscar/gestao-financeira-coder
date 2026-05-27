@@ -11,6 +11,7 @@ import {
   LogOut,
   Building2,
   ChevronRight,
+  Tag,
 } from 'lucide-react';
 
 const menuSections = [
@@ -21,6 +22,7 @@ const menuSections = [
       { icon: CreditCard, label: 'Cartoes', path: '/cartoes', color: '#6D5FFD' },
       { icon: Repeat, label: 'Assinaturas', path: '/assinaturas', color: '#3DD9D6' },
       { icon: TrendingUp, label: 'Investimentos', path: '/investimentos', color: '#2FD180' },
+      { icon: Tag, label: 'Categorias', path: '/categorias', color: '#FF8C42' },
     ],
   },
   {

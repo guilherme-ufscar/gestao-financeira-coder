@@ -20,6 +20,7 @@ import BudgetPage from './pages/app/budget/BudgetPage';
 import ReportsPage from './pages/app/reports/ReportsPage';
 import FamilyPage from './pages/app/family/FamilyPage';
 import SettingsPage from './pages/app/settings/SettingsPage';
+import CategoriesPage from './pages/app/categories/CategoriesPage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="/metas" element={<BudgetPage />} />
         <Route path="/relatorios" element={<ReportsPage />} />
         <Route path="/familia" element={<FamilyPage />} />
+        <Route path="/categorias" element={<CategoriesPage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<GuestRedirect />} />

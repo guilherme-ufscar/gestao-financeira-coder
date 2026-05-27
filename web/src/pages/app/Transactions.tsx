@@ -3,6 +3,7 @@ import { Search, TrendingUp, TrendingDown, X, Trash2, Pencil } from 'lucide-reac
 import api from '../../lib/api/client';
 import { formatCurrency } from '../../lib/utils';
 import CurrencyInput from '../../components/ui/CurrencyInput';
+import { getCategoryIcon } from './categories/CategoriesPage';
 
 function groupByDate(transactions: any[]) {
   const groups: Record<string, any[]> = {};
@@ -139,9 +140,7 @@ export default function Transactions() {
                     className="w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{ backgroundColor: (tx.category?.color || '#6D5FFD') + '15' }}
                   >
-                    <span className="text-xs font-bold" style={{ color: tx.category?.color || '#6D5FFD' }}>
-                      {(tx.category?.name || '?')[0].toUpperCase()}
-                    </span>
+                    {(() => { const Icon = getCategoryIcon(tx.category?.icon || ''); return <Icon size={18} style={{ color: tx.category?.color || '#6D5FFD' }} />; })()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-text-primary truncate font-medium">{tx.description}</p>

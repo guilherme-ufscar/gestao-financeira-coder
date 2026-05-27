@@ -209,4 +209,33 @@ export async function transactionRoutes(app: FastifyInstance) {
     });
     return reply.status(201).send(category);
   });
+
+  app.put('/categories/:id', async (request, reply) => {
+    const userId = (request as any).userId;
+    const { id } = request.params as { id: string };
+    const schema = z.object({
+      name: z.string().min(1).optional(),
+      icon: z.string().optional(),
+      color: z.string().optional(),
+    });
+
+    const body = schema.parse(request.body);
+    const cat = await prisma.category.findFirst({ where: { id, userId } });
+    if (!cat) return reply.status(403).send({ message: 'Categoria nao encontrada ou padrao' });
+
+    const updated = await prisma.category.update({ where: { id }, data: body });
+    return updated;
+  });
+
+  app.delete('/categories/:id', async (request, reply) => {
+    const userId = (request as any).userId;
+    const { id } = request.params as { id: string };
+
+    const cat = await prisma.category.findFirst({ where: { id, userId } });
+    if (!cat) return reply.status(403).send({ message: 'Apenas categorias personalizadas podem ser excluidas' });
+
+    await prisma.transaction.updateMany({ where: { categoryId: id }, data: { categoryId: null } });
+    await prisma.category.delete({ where: { id } });
+    return { message: 'Categoria excluida' };
+  });
 }

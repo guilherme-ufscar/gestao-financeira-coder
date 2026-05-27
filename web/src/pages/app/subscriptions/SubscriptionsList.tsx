@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, X, Search } from 'lucide-react';
+import { Plus, X, Search, RefreshCw } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -145,6 +145,15 @@ export default function SubscriptionsList() {
           <Plus size={16} className="text-white" />
         </button>
       </header>
+
+      <div className="glass-card p-4 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-danger/10 flex items-center justify-center shrink-0 mt-0.5">
+          <RefreshCw size={16} className="text-danger" />
+        </div>
+        <p className="text-xs text-text-secondary leading-relaxed">
+          Cadastre suas assinaturas e servicos recorrentes. Acompanhe quanto gasta por mes com streaming, apps e outros.
+        </p>
+      </div>
 
       <div className="glass-card-lg p-5">
         <p className="text-text-secondary text-xs uppercase tracking-wide mb-1">Total mensal estimado</p>

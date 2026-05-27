@@ -58,6 +58,15 @@ export default function AccountsList() {
         </div>
       </header>
 
+      <div className="glass-card p-4 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+          <Building2 size={16} className="text-primary" />
+        </div>
+        <p className="text-xs text-text-secondary leading-relaxed">
+          Gerencie suas contas bancarias e carteiras. Acompanhe o saldo de cada uma e defina uma conta padrao para lancamentos.
+        </p>
+      </div>
+
       <div className="glass-card-lg p-5">
         <p className="text-text-secondary text-xs uppercase tracking-wide mb-1">Patrimonio em contas</p>
         <p className="text-2xl font-bold text-text-primary">{formatCurrency(totalBalance)}</p>

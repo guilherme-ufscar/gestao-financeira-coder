@@ -89,6 +89,15 @@ export default function FamilyPage() {
         </div>
       </header>
 
+      <div className="glass-card p-4 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+          <Users size={16} className="text-primary" />
+        </div>
+        <p className="text-xs text-text-secondary leading-relaxed">
+          Compartilhe suas financas com a familia. Crie um grupo, convide membros por email ou codigo e acompanhem juntos receitas, despesas e saldos.
+        </p>
+      </div>
+
       {invites.length > 0 && (
         <div className="space-y-2 animate-fade-in-up">
           <h2 className="text-xs font-semibold text-text-secondary uppercase">Convites pendentes</h2>

@@ -59,6 +59,15 @@ export default function CardsList() {
         </button>
       </header>
 
+      <div className="glass-card p-4 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+          <CreditCard size={16} className="text-primary" />
+        </div>
+        <p className="text-xs text-text-secondary leading-relaxed">
+          Controle seus cartoes de credito, acompanhe o limite disponivel e veja a fatura atual de cada cartao.
+        </p>
+      </div>
+
       <div className="space-y-4">
         {cards.map((card) => {
           const used = getUsedLimit(card);

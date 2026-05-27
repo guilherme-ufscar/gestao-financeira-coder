@@ -93,6 +93,15 @@ export default function InvestmentsList() {
         </button>
       </header>
 
+      <div className="glass-card p-4 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center shrink-0 mt-0.5">
+          <TrendingUp size={16} className="text-success" />
+        </div>
+        <p className="text-xs text-text-secondary leading-relaxed">
+          Acompanhe seus investimentos em renda fixa, acoes e fundos. Veja a rentabilidade e o valor atualizado de cada aplicacao.
+        </p>
+      </div>
+
       <div className="glass-card-lg p-5">
         <p className="text-text-secondary text-xs uppercase tracking-wide mb-1">Patrimonio investido</p>
         <p className="text-2xl font-bold text-text-primary">{formatCurrency(totalCurrent)}</p>

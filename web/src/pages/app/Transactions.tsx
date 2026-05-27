@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Search, TrendingUp, TrendingDown } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, X, Trash2, Pencil } from 'lucide-react';
 import api from '../../lib/api/client';
 import { formatCurrency } from '../../lib/utils';
+import CurrencyInput from '../../components/ui/CurrencyInput';
 
 function groupByDate(transactions: any[]) {
   const groups: Record<string, any[]> = {};
@@ -29,11 +30,19 @@ export default function Transactions() {
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<any>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editDesc, setEditDesc] = useState('');
+  const [editAmount, setEditAmount] = useState(0);
+  const [editDate, setEditDate] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchTransactions = () => {
     const params = filter === 'all' ? '' : '?type=' + filter;
     api.get('/transactions' + params + (params ? '&' : '?') + 'limit=100').then((r) => setTransactions(r.data));
-  }, [filter]);
+  };
+
+  useEffect(() => { fetchTransactions(); }, [filter]);
 
   const filtered = search
     ? transactions.filter((tx) => tx.description?.toLowerCase().includes(search.toLowerCase()))
@@ -115,7 +124,17 @@ export default function Transactions() {
             </div>
             <div className="space-y-1.5">
               {txs.map((tx) => (
-                <div key={tx.id} className="glass-card p-3.5 flex items-center gap-3">
+                <button
+                  key={tx.id}
+                  onClick={() => {
+                    setSelectedTx(tx);
+                    setEditDesc(tx.description || '');
+                    setEditAmount(tx.amountInCents);
+                    setEditDate(new Date(tx.date).toISOString().split('T')[0]);
+                    setEditMode(false);
+                  }}
+                  className="glass-card w-full p-3.5 flex items-center gap-3 hover:bg-surface-hover transition-colors text-left"
+                >
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{ backgroundColor: (tx.category?.color || '#6D5FFD') + '15' }}
@@ -153,7 +172,7 @@ export default function Transactions() {
                       </p>
                     )}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -165,6 +184,126 @@ export default function Transactions() {
           </div>
         )}
       </div>
+
+      {selectedTx && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setSelectedTx(null)} />
+          <div className="relative glass-card-lg w-full max-w-md p-6 m-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-text-primary">
+                {editMode ? 'Editar transacao' : 'Detalhes'}
+              </h2>
+              <button onClick={() => setSelectedTx(null)} className="text-text-tertiary hover:text-text-primary">
+                <X size={20} />
+              </button>
+            </div>
+
+            {!editMode ? (
+              <div className="space-y-3">
+                <div className="glass-card p-4">
+                  <p className="text-xs text-text-tertiary mb-1">Descricao</p>
+                  <p className="text-sm font-medium text-text-primary">{selectedTx.description}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="glass-card p-4">
+                    <p className="text-xs text-text-tertiary mb-1">Valor</p>
+                    <p className={'text-sm font-bold ' + (selectedTx.type === 'income' ? 'text-success' : 'text-danger')}>
+                      {selectedTx.type === 'income' ? '+' : '-'}{formatCurrency(selectedTx.amountInCents)}
+                    </p>
+                  </div>
+                  <div className="glass-card p-4">
+                    <p className="text-xs text-text-tertiary mb-1">Data</p>
+                    <p className="text-sm text-text-primary">
+                      {new Date(selectedTx.date).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                </div>
+                {selectedTx.category && (
+                  <div className="glass-card p-4">
+                    <p className="text-xs text-text-tertiary mb-1">Categoria</p>
+                    <span className="text-xs px-2 py-1 rounded-md" style={{ backgroundColor: selectedTx.category.color + '15', color: selectedTx.category.color }}>
+                      {selectedTx.category.name}
+                    </span>
+                  </div>
+                )}
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="flex-1 py-3 rounded-xl glass-card flex items-center justify-center gap-2 text-sm text-text-primary hover:bg-surface-hover transition-colors"
+                  >
+                    <Pencil size={14} /> Editar
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!confirm('Tem certeza que deseja excluir esta transacao?')) return;
+                      setLoading(true);
+                      try {
+                        await api.delete('/transactions/' + selectedTx.id);
+                        setSelectedTx(null);
+                        fetchTransactions();
+                      } catch {} finally { setLoading(false); }
+                    }}
+                    disabled={loading}
+                    className="py-3 px-5 rounded-xl border border-danger/30 text-danger text-sm hover:bg-danger/10 transition-colors flex items-center gap-2"
+                  >
+                    <Trash2 size={14} /> Excluir
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs text-text-tertiary mb-1">Descricao</label>
+                  <input
+                    className="input-field"
+                    value={editDesc}
+                    onChange={(e) => setEditDesc(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-text-tertiary mb-1">Valor</label>
+                  <CurrencyInput value={editAmount} onChange={(v) => setEditAmount(v)} />
+                </div>
+                <div>
+                  <label className="block text-xs text-text-tertiary mb-1">Data</label>
+                  <input
+                    type="date"
+                    className="input-field"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => setEditMode(false)}
+                    className="flex-1 py-3 rounded-xl glass-card text-sm text-text-secondary hover:bg-surface-hover transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setLoading(true);
+                      try {
+                        await api.put('/transactions/' + selectedTx.id, {
+                          description: editDesc,
+                          amountInCents: editAmount,
+                          date: editDate,
+                        });
+                        setSelectedTx(null);
+                        fetchTransactions();
+                      } catch {} finally { setLoading(false); }
+                    }}
+                    disabled={loading}
+                    className="flex-1 btn-primary disabled:opacity-50"
+                  >
+                    {loading ? 'Salvando...' : 'Salvar'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -111,6 +111,15 @@ export default function BudgetPage() {
         </button>
       </header>
 
+      <div className="glass-card p-4 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-warning/10 flex items-center justify-center shrink-0 mt-0.5">
+          <Target size={16} className="text-warning" />
+        </div>
+        <p className="text-xs text-text-secondary leading-relaxed">
+          Defina limites de gastos por categoria, crie metas de economia e controle suas dividas. Tudo para manter suas financas no rumo.
+        </p>
+      </div>
+
       <div className="flex gap-2">
         {(['budget', 'goals', 'debts'] as const).map((t) => (
           <button

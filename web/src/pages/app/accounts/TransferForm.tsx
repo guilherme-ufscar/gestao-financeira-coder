@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '../../../lib/api/client';
 import { formatCurrency } from '../../../lib/utils';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 const schema = z.object({
   fromAccountId: z.string().uuid('Selecione a conta de origem'),
@@ -31,7 +32,7 @@ interface Props {
 export default function TransferForm({ accounts, onClose, onSaved }: Props) {
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { fromAccountId: '', toAccountId: '', amountInCents: 0 },
   });
@@ -87,13 +88,10 @@ export default function TransferForm({ accounts, onClose, onSaved }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm text-text-secondary mb-1">Valor (R$)</label>
-            <input
-              type="number"
-              step="0.01"
-              className="input-field"
-              placeholder="0,00"
-              onChange={(e) => setValue('amountInCents', Math.round(parseFloat(e.target.value || '0') * 100))}
+            <label className="block text-sm text-text-secondary mb-1">Valor</label>
+            <CurrencyInput
+              value={watch('amountInCents')}
+              onChange={(v) => setValue('amountInCents', v)}
             />
             {errors.amountInCents && <p className="text-danger text-xs mt-1">{errors.amountInCents.message}</p>}
           </div>

@@ -67,6 +67,7 @@ model Account {
   bankSlug        String?
   color           String   @default("#6D5FFD")
   balanceInCents  Int      @default(0)
+  isDefault       Boolean  @default(false)
   yieldsEnabled   Boolean  @default(false)
   yieldRatePercent Float?
   yieldType       String?

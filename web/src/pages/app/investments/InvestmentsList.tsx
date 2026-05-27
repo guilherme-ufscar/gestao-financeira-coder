@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '../../../lib/api/client';
 import { formatCurrency } from '../../../lib/utils';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 const schema = z.object({
   type: z.string().min(1),
@@ -47,7 +48,7 @@ export default function InvestmentsList() {
   const totalCurrent = investments.reduce((s, i) => s + i.currentValueInCents, 0);
   const totalYield = totalCurrent - totalInvested;
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       type: 'cdb',
@@ -158,25 +159,17 @@ export default function InvestmentsList() {
               <input className="input-field" placeholder="Ticker (opcional)" {...register('ticker')} />
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-text-tertiary mb-1">Valor aplicado (R$)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="input-field"
-                    onChange={(e) => {
-                      const v = Math.round(parseFloat(e.target.value || '0') * 100);
-                      setValue('amountInCents', v);
-                      setValue('currentValueInCents', v);
-                    }}
+                  <label className="block text-xs text-text-tertiary mb-1">Valor aplicado</label>
+                  <CurrencyInput
+                    value={watch('amountInCents')}
+                    onChange={(v) => { setValue('amountInCents', v); setValue('currentValueInCents', v); }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-text-tertiary mb-1">Valor atual (R$)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="input-field"
-                    onChange={(e) => setValue('currentValueInCents', Math.round(parseFloat(e.target.value || '0') * 100))}
+                  <label className="block text-xs text-text-tertiary mb-1">Valor atual</label>
+                  <CurrencyInput
+                    value={watch('currentValueInCents')}
+                    onChange={(v) => setValue('currentValueInCents', v)}
                   />
                 </div>
               </div>

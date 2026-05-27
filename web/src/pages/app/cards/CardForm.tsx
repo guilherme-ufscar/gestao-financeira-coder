@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '../../../lib/api/client';
 import CreditCardVisual from './CreditCardVisual';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatorio'),
@@ -132,14 +133,10 @@ export default function CardForm({ card, accounts, onClose, onSaved, onDelete }:
           </div>
 
           <div>
-            <label className="block text-sm text-text-secondary mb-1">Limite (R$)</label>
-            <input
-              type="number"
-              step="0.01"
-              className="input-field"
-              placeholder="0,00"
-              onChange={(e) => setValue('limitInCents', Math.round(parseFloat(e.target.value || '0') * 100))}
-              defaultValue={card ? (card.limitInCents / 100).toFixed(2) : ''}
+            <label className="block text-sm text-text-secondary mb-1">Limite</label>
+            <CurrencyInput
+              value={watch('limitInCents')}
+              onChange={(v) => setValue('limitInCents', v)}
             />
             {errors.limitInCents && <p className="text-danger text-xs mt-1">{errors.limitInCents.message}</p>}
           </div>

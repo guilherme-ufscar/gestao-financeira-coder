@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '../../../lib/api/client';
 import { formatCurrency } from '../../../lib/utils';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatorio'),
@@ -60,7 +61,7 @@ export default function SubscriptionsList() {
       return sum + s.amountInCents;
     }, 0);
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       cycle: 'monthly',
@@ -175,12 +176,10 @@ export default function SubscriptionsList() {
                 {errors.name && <p className="text-danger text-xs mt-1">{errors.name.message}</p>}
               </div>
               <div>
-                <input
-                  type="number"
-                  step="0.01"
-                  className="input-field"
-                  placeholder="Valor (R$)"
-                  onChange={(e) => setValue('amountInCents', Math.round(parseFloat(e.target.value || '0') * 100))}
+                <CurrencyInput
+                  value={watch('amountInCents')}
+                  onChange={(v) => setValue('amountInCents', v)}
+                  placeholder="Valor"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">

@@ -19,6 +19,7 @@ A fonte da verdade do produto (funcionalidades, design system, entidades, requis
 Estas regras são absolutas. Quebrá-las atrapalha diretamente o meu fluxo de trabalho.
 
 1. **NÃO rode `npm run build` (nem `yarn build`, `pnpm build`, `next build`, `vite build`, etc.) localmente/na sua sessão.** Não execute builds de produção do frontend. Eu mesmo farei os builds depois, na minha VPS, para não gastar tempo da sua execução. Você pode (e deve) **escrever** os scripts de build, Dockerfiles e configs — só **não executá-los**.
+   - **Exceção para teste no celular:** quando estiver testando no celular via USB, use `npx vite --host` (dev server) + `capacitor.config.ts` com `server.url` apontando pro IP local. Assim o celular carrega do dev server e mudanças aparecem em tempo real sem precisar buildar. Só faça build+APK quando eu pedir explicitamente.
 
 2. **NÃO rode `docker compose up`, `docker compose build`, `docker build`, nem qualquer comando que construa ou suba containers.** Escreva todos os `Dockerfile`, o `docker-compose.yml` e os arquivos de configuração corretamente, mas **não os execute**. O build e o `up` serão feitos por mim na VPS.
 

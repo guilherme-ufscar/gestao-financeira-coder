@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '../../../lib/api/client';
 import { formatCurrency } from '../../../lib/utils';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 const budgetSchema = z.object({
   categoryId: z.string().uuid(),
@@ -245,12 +246,10 @@ export default function BudgetPage() {
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
-                <input
-                  type="number"
-                  step="0.01"
-                  className="input-field"
-                  placeholder="Limite (R$)"
-                  onChange={(e) => budgetForm.setValue('limitInCents', Math.round(parseFloat(e.target.value || '0') * 100))}
+                <CurrencyInput
+                  value={budgetForm.watch('limitInCents')}
+                  onChange={(v) => budgetForm.setValue('limitInCents', v)}
+                  placeholder="Limite"
                 />
                 <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">Salvar</button>
               </form>
@@ -259,19 +258,15 @@ export default function BudgetPage() {
             {tab === 'goals' && (
               <form onSubmit={goalForm.handleSubmit(onGoalSubmit)} className="space-y-3">
                 <input className="input-field" placeholder="Nome da meta" {...goalForm.register('name')} />
-                <input
-                  type="number"
-                  step="0.01"
-                  className="input-field"
-                  placeholder="Valor alvo (R$)"
-                  onChange={(e) => goalForm.setValue('targetInCents', Math.round(parseFloat(e.target.value || '0') * 100))}
+                <CurrencyInput
+                  value={goalForm.watch('targetInCents')}
+                  onChange={(v) => goalForm.setValue('targetInCents', v)}
+                  placeholder="Valor alvo"
                 />
-                <input
-                  type="number"
-                  step="0.01"
-                  className="input-field"
-                  placeholder="Valor atual (R$)"
-                  onChange={(e) => goalForm.setValue('currentInCents', Math.round(parseFloat(e.target.value || '0') * 100))}
+                <CurrencyInput
+                  value={goalForm.watch('currentInCents')}
+                  onChange={(v) => goalForm.setValue('currentInCents', v)}
+                  placeholder="Valor atual"
                 />
                 <input type="date" className="input-field" placeholder="Prazo" {...goalForm.register('deadline')} />
                 <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">Salvar</button>
@@ -281,16 +276,10 @@ export default function BudgetPage() {
             {tab === 'debts' && (
               <form onSubmit={debtForm.handleSubmit(onDebtSubmit)} className="space-y-3">
                 <input className="input-field" placeholder="Descricao" {...debtForm.register('description')} />
-                <input
-                  type="number"
-                  step="0.01"
-                  className="input-field"
-                  placeholder="Valor total (R$)"
-                  onChange={(e) => {
-                    const v = Math.round(parseFloat(e.target.value || '0') * 100);
-                    debtForm.setValue('totalInCents', v);
-                    debtForm.setValue('remainingInCents', v);
-                  }}
+                <CurrencyInput
+                  value={debtForm.watch('totalInCents')}
+                  onChange={(v) => { debtForm.setValue('totalInCents', v); debtForm.setValue('remainingInCents', v); }}
+                  placeholder="Valor total"
                 />
                 <input className="input-field" placeholder="Credor (opcional)" {...debtForm.register('creditor')} />
                 <input type="date" className="input-field" {...debtForm.register('dueDate')} />

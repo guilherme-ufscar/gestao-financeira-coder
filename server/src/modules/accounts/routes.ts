@@ -44,6 +44,7 @@ export async function accountRoutes(app: FastifyInstance) {
       type: z.string().optional(),
       bankSlug: z.string().nullable().optional(),
       color: z.string().optional(),
+      isDefault: z.boolean().optional(),
       yieldsEnabled: z.boolean().optional(),
       yieldRatePercent: z.number().nullable().optional(),
       yieldType: z.string().nullable().optional(),
@@ -51,6 +52,14 @@ export async function accountRoutes(app: FastifyInstance) {
     });
 
     const body = schema.parse(request.body);
+
+    if (body.isDefault) {
+      await prisma.account.updateMany({
+        where: { userId },
+        data: { isDefault: false },
+      });
+    }
+
     const account = await prisma.account.updateMany({
       where: { id, userId },
       data: body,

@@ -5,6 +5,7 @@ import AuthLayout from './pages/auth/AuthLayout';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import Onboarding from './pages/auth/Onboarding';
 import AppLayout from './pages/app/AppLayout';
 import Dashboard from './pages/app/Dashboard';
 import Transactions from './pages/app/Transactions';
@@ -16,10 +17,13 @@ import NewTransaction from './pages/app/NewTransaction';
 import SubscriptionsList from './pages/app/subscriptions/SubscriptionsList';
 import InvestmentsList from './pages/app/investments/InvestmentsList';
 import BudgetPage from './pages/app/budget/BudgetPage';
+import ReportsPage from './pages/app/reports/ReportsPage';
+import FamilyPage from './pages/app/family/FamilyPage';
+import SettingsPage from './pages/app/settings/SettingsPage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/onboarding" replace />;
   return <>{children}</>;
 }
 
@@ -27,6 +31,12 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   if (isAuthenticated) return <Navigate to="/" replace />;
   return <>{children}</>;
+}
+
+function GuestRedirect() {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (isAuthenticated) return <Navigate to="/" replace />;
+  return <Navigate to="/onboarding" replace />;
 }
 
 export default function App() {
@@ -39,6 +49,7 @@ export default function App() {
         <Route path="/cadastro" element={<Register />} />
         <Route path="/recuperar-senha" element={<ForgotPassword />} />
       </Route>
+      <Route path="/onboarding" element={<PublicRoute><Onboarding /></PublicRoute>} />
       <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/transacoes" element={<Transactions />} />
@@ -50,8 +61,11 @@ export default function App() {
         <Route path="/assinaturas" element={<SubscriptionsList />} />
         <Route path="/investimentos" element={<InvestmentsList />} />
         <Route path="/metas" element={<BudgetPage />} />
+        <Route path="/relatorios" element={<ReportsPage />} />
+        <Route path="/familia" element={<FamilyPage />} />
+        <Route path="/configuracoes" element={<SettingsPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<GuestRedirect />} />
     </Routes>
   );
 }

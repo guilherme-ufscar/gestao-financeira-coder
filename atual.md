@@ -10,7 +10,7 @@
 - CRUD: contas, transacoes, cartoes, assinaturas, investimentos
 - Orcamento, metas, dividas
 - Categorias padrao ao registrar
-- Familia (rotas)
+- Familia (rotas completas: circulos, convites, aceitar/rejeitar, summary)
 - Notificacoes push (rotas)
 - CORS aberto (origin: true) para app nativo funcionar
 - Prisma ORM com 18 modelos
@@ -20,11 +20,24 @@
 - React + Vite + Tailwind + Zustand
 - Tema dark/light com glassmorphism
 - PWA com service worker
-- Paginas: Login, Registro, Recuperar Senha, Dashboard, Transacoes, Lancamento Rapido, Calendario, Contas, Cartoes (visual glassmorphism), Assinaturas, Investimentos, Orcamento/Metas/Dividas, Menu Mais
+- Paginas implementadas:
+  - Login, Registro, Recuperar Senha
+  - **Onboarding** (6 slides com cards animados, swipe, antes do login)
+  - **Dashboard redesenhado** (6 secoes: saldo com grid, contas scroll horizontal, cartoes scroll horizontal, gastos por categoria com donut chart, proximos vencimentos em cards, acesso rapido grid 2x2)
+  - **Transacoes** (agrupadas por data, busca, chips filtro, resumo receitas/despesas)
+  - **Lancamento Rapido** (fluxo em 4 steps com Framer Motion: valor > categoria > conta/cartao > detalhes)
+  - Calendario
+  - Contas, Cartoes (visual glassmorphism), Assinaturas, Investimentos
+  - Orcamento/Metas/Dividas
+  - **Relatorios** (graficos barras evolucao mensal, donut categorias, filtro periodo)
+  - **Gestao Familiar** (criar circulo, convidar, aceitar/rejeitar, resumo financeiro)
+  - **Configuracoes** (perfil, tema auto/dark/light, alterar senha, biometria toggle, logout)
+  - **Menu Mais** (organizado em secoes com icones coloridos)
 - Login biometrico (digital) no app nativo
+- CSS: classes glass-card-gradient, card-glow, chip/chip-active, section-header, animacoes fadeInUp/slideInRight
 
 ### App Android (Capacitor)
-- APK gerado: D:\coder\gestao-financeira\Cofrin.apk (8.1MB)
+- APK gerado: D:\coder\gestao-financeira\Cofrin.apk (8MB)
 - Package: com.codermaster.cofrin
 - Icone customizado
 - Conecta direto no IP da VPS (http://66.94.105.155:10206/api)
@@ -46,9 +59,6 @@
 ## O que falta / proximos passos
 
 ### Funcionalidades pendentes
-- [ ] Relatorios com graficos (Recharts ja instalado)
-- [ ] Circulo familiar (convites, permissoes, compartilhamento)
-- [ ] Pagina de configuracoes (perfil, tema, notificacoes)
 - [ ] Notificacoes push (VAPID keys, subscription no frontend)
 - [ ] Importacao de extratos (CSV/OFX)
 - [ ] Exportacao de dados (PDF/Excel)
@@ -75,9 +85,21 @@ npm run dev:server   # API em localhost:3000
 npm run dev:worker   # Worker com cron jobs
 ```
 
-### Build
-```bash
-npm run build:web    # Build producao do frontend
+### Teste no celular via USB (live reload)
+```powershell
+# 1. Configurar capacitor.config.ts com server.url apontando pro IP local
+# 2. Sync + build + instalar:
+cd D:\coder\gestao-financeira\web
+npx cap sync android
+$env:JAVA_HOME = "D:\programas\jdk21\jdk-21.0.5+11"
+$env:ANDROID_HOME = "D:\programas\android-sdk"
+$env:ANDROID_SDK_ROOT = "D:\programas\android-sdk"
+$env:GRADLE_USER_HOME = "D:\programas\.gradle"
+cd android
+.\gradlew.bat assembleDebug --no-daemon
+# Instalar no celular:
+D:\programas\android-sdk\platform-tools\adb.exe install -r app\build\outputs\apk\debug\app-debug.apk
+D:\programas\android-sdk\platform-tools\adb.exe shell am start -n com.codermaster.cofrin/.MainActivity
 ```
 
 ### Deploy na VPS
@@ -88,12 +110,11 @@ docker compose up -d --build
 docker compose exec api npx prisma db push  # se mudar schema
 ```
 
-### Gerar APK
+### Gerar APK final
 ```bash
 cd web
 npx vite build
 npx cap sync android
-# No PowerShell com env vars configuradas:
 cd android
 .\gradlew.bat assembleDebug --no-daemon
 # APK em: android/app/build/outputs/apk/debug/app-debug.apk

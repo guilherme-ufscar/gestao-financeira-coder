@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Building2, ArrowRightLeft } from 'lucide-react';
 import api from '../../../lib/api/client';
 import { formatCurrency } from '../../../lib/utils';
+import BankLogo from '../../../components/ui/BankLogo';
 import AccountForm from './AccountForm';
 import TransferForm from './TransferForm';
 
@@ -12,6 +13,7 @@ interface Account {
   bankSlug: string | null;
   color: string;
   balanceInCents: number;
+  isDefault: boolean;
   yieldsEnabled: boolean;
   yieldRatePercent: number | null;
 }
@@ -72,10 +74,19 @@ export default function AccountsList() {
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ backgroundColor: account.color + '20' }}
             >
-              <Building2 size={18} style={{ color: account.color }} />
+              {account.bankSlug && account.bankSlug !== 'outro' ? (
+                <BankLogo slug={account.bankSlug} size={28} />
+              ) : (
+                <Building2 size={18} style={{ color: account.color }} />
+              )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate">{account.name}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-medium text-text-primary truncate">{account.name}</p>
+                {account.isDefault && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-semibold shrink-0">Padrao</span>
+                )}
+              </div>
               <p className="text-xs text-text-tertiary">{account.type}</p>
             </div>
             <div className="text-right">

@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '../../../lib/api/client';
+import BankLogo from '../../../components/ui/BankLogo';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatorio'),
@@ -11,6 +13,7 @@ const schema = z.object({
   bankSlug: z.string().optional(),
   color: z.string(),
   balanceInCents: z.number(),
+  isDefault: z.boolean(),
   yieldsEnabled: z.boolean(),
   yieldRatePercent: z.number().nullable().optional(),
   yieldCapInCents: z.number().nullable().optional(),
@@ -36,14 +39,14 @@ const accountTypes = [
 
 const banks = [
   { slug: 'nubank', name: 'Nubank', color: '#8B11F0' },
-  { slug: 'itau', name: 'Itau', color: '#003399' },
+  { slug: 'itau', name: 'Itau', color: '#EC7000' },
   { slug: 'bradesco', name: 'Bradesco', color: '#CC092F' },
-  { slug: 'bb', name: 'Banco do Brasil', color: '#FFEF00' },
+  { slug: 'bb', name: 'BB', color: '#FFEF00' },
   { slug: 'caixa', name: 'Caixa', color: '#005CA9' },
   { slug: 'santander', name: 'Santander', color: '#EC0000' },
   { slug: 'inter', name: 'Inter', color: '#FF7A00' },
-  { slug: 'c6', name: 'C6 Bank', color: '#1A1A1A' },
-  { slug: 'mercadopago', name: 'Mercado Pago', color: '#009EE3' },
+  { slug: 'c6', name: 'C6', color: '#1A1A1A' },
+  { slug: 'mercadopago', name: 'M. Pago', color: '#009EE3' },
   { slug: 'picpay', name: 'PicPay', color: '#21C25E' },
   { slug: 'neon', name: 'Neon', color: '#0066FF' },
   { slug: 'pagbank', name: 'PagBank', color: '#00A859' },
@@ -62,6 +65,7 @@ export default function AccountForm({ account, onClose, onSaved, onDelete }: Pro
       bankSlug: account?.bankSlug || '',
       color: account?.color || '#6D5FFD',
       balanceInCents: account?.balanceInCents || 0,
+      isDefault: account?.isDefault || false,
       yieldsEnabled: account?.yieldsEnabled || false,
       yieldRatePercent: account?.yieldRatePercent || null,
       yieldCapInCents: account?.yieldCapInCents || null,
@@ -87,7 +91,7 @@ export default function AccountForm({ account, onClose, onSaved, onDelete }: Pro
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative glass-card-lg w-full max-w-md max-h-[85vh] overflow-y-auto p-6 m-4">
         <div className="flex items-center justify-between mb-4">
@@ -111,7 +115,9 @@ export default function AccountForm({ account, onClose, onSaved, onDelete }: Pro
                   className="p-2 rounded-lg border border-border hover:border-primary text-center transition-colors"
                   style={{ borderColor: watch('bankSlug') === bank.slug ? bank.color : undefined }}
                 >
-                  <div className="w-6 h-6 rounded-full mx-auto mb-1" style={{ backgroundColor: bank.color }} />
+                  <div className="w-6 h-6 mx-auto mb-1 flex items-center justify-center">
+                    <BankLogo slug={bank.slug} size={24} />
+                  </div>
                   <span className="text-[10px] text-text-secondary">{bank.name}</span>
                 </button>
               ))}
@@ -133,17 +139,25 @@ export default function AccountForm({ account, onClose, onSaved, onDelete }: Pro
 
           {!isEditing && (
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Saldo inicial (R$)</label>
-              <input
-                type="number"
-                step="0.01"
-                className="input-field"
-                placeholder="0,00"
-                onChange={(e) => setValue('balanceInCents', Math.round(parseFloat(e.target.value || '0') * 100))}
-                defaultValue={account ? (account.balanceInCents / 100).toFixed(2) : ''}
+              <label className="block text-sm text-text-secondary mb-1">Saldo inicial</label>
+              <CurrencyInput
+                value={watch('balanceInCents')}
+                onChange={(v) => setValue('balanceInCents', v)}
               />
             </div>
           )}
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="isDefault"
+              className="w-4 h-4 rounded accent-primary"
+              {...register('isDefault')}
+            />
+            <label htmlFor="isDefault" className="text-sm text-text-secondary">
+              Conta padrao para lancamentos
+            </label>
+          </div>
 
           <div className="flex items-center gap-3">
             <input
@@ -171,14 +185,11 @@ export default function AccountForm({ account, onClose, onSaved, onDelete }: Pro
                 />
               </div>
               <div>
-                <label className="block text-xs text-text-tertiary mb-1">Teto de rendimento (R$)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  className="input-field"
-                  placeholder="Ex: 10000 (rende ate esse saldo)"
-                  onChange={(e) => setValue('yieldCapInCents', e.target.value ? Math.round(parseFloat(e.target.value) * 100) : null)}
-                  defaultValue={account?.yieldCapInCents ? (account.yieldCapInCents / 100).toFixed(2) : ''}
+                <label className="block text-xs text-text-tertiary mb-1">Teto de rendimento</label>
+                <CurrencyInput
+                  value={watch('yieldCapInCents') || 0}
+                  onChange={(v) => setValue('yieldCapInCents', v || null)}
+                  placeholder="R$ 0,00 (rende ate esse saldo)"
                 />
               </div>
             </div>

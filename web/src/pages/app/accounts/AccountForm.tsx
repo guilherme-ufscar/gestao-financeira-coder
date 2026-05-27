@@ -23,6 +23,7 @@ type FormData = z.infer<typeof schema>;
 
 interface Props {
   account: any | null;
+  existingAccounts?: any[];
   onClose: () => void;
   onSaved: () => void;
   onDelete?: () => void;
@@ -53,7 +54,7 @@ const banks = [
   { slug: 'outro', name: 'Outro', color: '#6D5FFD' },
 ];
 
-export default function AccountForm({ account, onClose, onSaved, onDelete }: Props) {
+export default function AccountForm({ account, existingAccounts = [], onClose, onSaved, onDelete }: Props) {
   const [loading, setLoading] = useState(false);
   const isEditing = !!account;
 
@@ -111,7 +112,17 @@ export default function AccountForm({ account, onClose, onSaved, onDelete }: Pro
                 <button
                   key={bank.slug}
                   type="button"
-                  onClick={() => { setValue('bankSlug', bank.slug); setValue('color', bank.color); }}
+                  onClick={() => {
+                    setValue('bankSlug', bank.slug);
+                    setValue('color', bank.color);
+                    if (!isEditing) {
+                      const sameName = existingAccounts.filter((a) =>
+                        a.name.toLowerCase().startsWith(bank.name.toLowerCase())
+                      );
+                      const name = sameName.length > 0 ? `${bank.name} - ${sameName.length + 1}` : bank.name;
+                      setValue('name', name);
+                    }
+                  }}
                   className="p-2 rounded-lg border border-border hover:border-primary text-center transition-colors"
                   style={{ borderColor: watch('bankSlug') === bank.slug ? bank.color : undefined }}
                 >
@@ -124,11 +135,13 @@ export default function AccountForm({ account, onClose, onSaved, onDelete }: Pro
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm text-text-secondary mb-1">Nome da conta</label>
-            <input className="input-field" placeholder="Ex: Nubank" {...register('name')} />
-            {errors.name && <p className="text-danger text-xs mt-1">{errors.name.message}</p>}
-          </div>
+          {isEditing && (
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Nome da conta</label>
+              <input className="input-field" placeholder="Ex: Nubank" {...register('name')} />
+              {errors.name && <p className="text-danger text-xs mt-1">{errors.name.message}</p>}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm text-text-secondary mb-1">Tipo</label>

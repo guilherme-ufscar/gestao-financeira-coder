@@ -116,6 +116,7 @@ export default function AccountsList() {
       {showForm && (
         <AccountForm
           account={editingAccount}
+          existingAccounts={accounts}
           onClose={() => setShowForm(false)}
           onSaved={() => { setShowForm(false); fetchAccounts(); }}
           onDelete={editingAccount ? () => { handleDelete(editingAccount.id); setShowForm(false); } : undefined}

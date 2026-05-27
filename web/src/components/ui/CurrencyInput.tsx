@@ -9,11 +9,11 @@ interface CurrencyInputProps {
 }
 
 export default function CurrencyInput({ value, onChange, placeholder = 'R$ 0,00', className = 'input-field', id }: CurrencyInputProps) {
-  const [displayValue, setDisplayValue] = useState(() => formatFromCents(value));
+  const [displayValue, setDisplayValue] = useState(() => formatFromCents(value || 0));
   const inputRef = useRef<HTMLInputElement>(null);
 
   function formatFromCents(cents: number): string {
-    if (cents === 0) return '';
+    if (!cents || cents === 0) return '';
     const abs = Math.abs(cents);
     const reais = Math.floor(abs / 100);
     const centavos = abs % 100;

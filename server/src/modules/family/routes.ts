@@ -51,6 +51,17 @@ export async function familyRoutes(app: FastifyInstance) {
     return reply.status(201).send(circle);
   });
 
+  app.delete('/circles/:id', async (request, reply) => {
+    const userId = (request as any).userId;
+    const { id } = request.params as { id: string };
+
+    const circle = await prisma.familyCircle.findFirst({ where: { id, ownerId: userId } });
+    if (!circle) return reply.status(403).send({ message: 'Apenas o criador pode excluir o circulo' });
+
+    await prisma.familyCircle.delete({ where: { id } });
+    return { message: 'Circulo excluido' };
+  });
+
   app.post('/circles/:id/invite', async (request, reply) => {
     const userId = (request as any).userId;
     const { id } = request.params as { id: string };
@@ -149,17 +160,6 @@ export async function familyRoutes(app: FastifyInstance) {
     });
 
     return { message: 'Entrou no circulo', circleName: circle.name };
-  });
-
-  app.delete('/circles/:id', async (request, reply) => {
-    const userId = (request as any).userId;
-    const { id } = request.params as { id: string };
-
-    const circle = await prisma.familyCircle.findFirst({ where: { id, ownerId: userId } });
-    if (!circle) return reply.status(403).send({ message: 'Apenas o criador pode excluir o circulo' });
-
-    await prisma.familyCircle.delete({ where: { id } });
-    return { message: 'Circulo excluido' };
   });
 
   app.get('/circles/:id/summary', async (request, reply) => {

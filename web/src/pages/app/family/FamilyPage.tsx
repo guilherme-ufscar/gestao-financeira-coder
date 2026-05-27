@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
-import { Users, Plus, Mail, Check, X, Crown, UserPlus, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { Users, Plus, Mail, Check, X, Crown, UserPlus, TrendingUp, TrendingDown, Wallet, Copy, Hash } from 'lucide-react';
 import api from '../../../lib/api/client';
 import { formatCurrency } from '../../../lib/utils';
 
@@ -8,11 +8,15 @@ export default function FamilyPage() {
   const [invites, setInvites] = useState<any[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const [circleName, setCircleName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
+  const [joinCode, setJoinCode] = useState('');
   const [selectedCircle, setSelectedCircle] = useState<any>(null);
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [joinError, setJoinError] = useState('');
 
   const fetchData = async () => {
     const [circlesRes, invitesRes] = await Promise.all([
@@ -65,14 +69,24 @@ export default function FamilyPage() {
     <div className="p-4 space-y-5">
       <header className="flex items-center justify-between">
         <h1 className="text-lg font-bold text-text-primary">Gestao Familiar</h1>
-        {circles.length > 0 && (
-          <button
-            onClick={() => setShowInvite(true)}
-            className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center"
-          >
-            <UserPlus size={16} className="text-white" />
-          </button>
-        )}
+        <div className="flex gap-2">
+          {circles.length === 0 && (
+            <button
+              onClick={() => setShowJoin(true)}
+              className="w-9 h-9 rounded-xl glass-card flex items-center justify-center"
+            >
+              <Hash size={16} className="text-text-primary" />
+            </button>
+          )}
+          {circles.length > 0 && (
+            <button
+              onClick={() => setShowInvite(true)}
+              className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center"
+            >
+              <UserPlus size={16} className="text-white" />
+            </button>
+          )}
+        </div>
       </header>
 
       {invites.length > 0 && (
@@ -117,6 +131,9 @@ export default function FamilyPage() {
           </p>
           <button onClick={() => setShowCreate(true)} className="btn-primary">
             <Plus size={16} className="inline mr-1.5" /> Criar circulo
+          </button>
+          <button onClick={() => setShowJoin(true)} className="mt-3 text-sm text-primary hover:underline">
+            Tenho um codigo de grupo
           </button>
         </div>
       ) : (
@@ -202,18 +219,98 @@ export default function FamilyPage() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowInvite(false)} />
           <div className="relative glass-card-lg w-full max-w-md p-6 m-4">
-            <h2 className="text-lg font-bold text-text-primary mb-2">Convidar membro</h2>
-            <p className="text-sm text-text-secondary mb-4">Um e-mail sera enviado com o convite</p>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-text-primary">Convidar membro</h2>
+              <button onClick={() => setShowInvite(false)} className="text-text-tertiary hover:text-text-primary">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="glass-card p-4">
+                <p className="text-xs text-text-tertiary uppercase tracking-wide mb-2">Codigo do grupo</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl font-mono font-bold text-primary tracking-widest">
+                    {selectedCircle?.joinCode || '----'}
+                  </span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedCircle?.joinCode || '');
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
+                  >
+                    {copied ? <Check size={16} className="text-success" /> : <Copy size={16} className="text-primary" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-text-tertiary mt-2">Compartilhe este codigo para alguem entrar no grupo</p>
+              </div>
+
+              <div className="relative flex items-center gap-3">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-[10px] text-text-tertiary uppercase">ou convide por email</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+
+              <div>
+                <input
+                  type="email"
+                  className="input-field mb-3"
+                  placeholder="E-mail do membro"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+                <button onClick={sendInvite} disabled={loading || !inviteEmail.trim()} className="btn-primary w-full disabled:opacity-40">
+                  <Mail size={14} className="inline mr-1.5" />
+                  {loading ? 'Enviando...' : 'Enviar convite por email'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showJoin && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={() => { setShowJoin(false); setJoinError(''); }} />
+          <div className="relative glass-card-lg w-full max-w-md p-6 m-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-text-primary">Entrar em um grupo</h2>
+              <button onClick={() => { setShowJoin(false); setJoinError(''); }} className="text-text-tertiary hover:text-text-primary">
+                <X size={20} />
+              </button>
+            </div>
+            <p className="text-sm text-text-secondary mb-4">Digite o codigo de 4 digitos do grupo familiar</p>
             <input
-              type="email"
-              className="input-field mb-4"
-              placeholder="E-mail do membro"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
+              className="input-field text-center text-2xl font-mono tracking-[0.5em] uppercase mb-3"
+              placeholder="XXXX"
+              maxLength={4}
+              value={joinCode}
+              onChange={(e) => { setJoinCode(e.target.value.toUpperCase()); setJoinError(''); }}
               autoFocus
             />
-            <button onClick={sendInvite} disabled={loading || !inviteEmail.trim()} className="btn-primary w-full disabled:opacity-40">
-              {loading ? 'Enviando...' : 'Enviar convite'}
+            {joinError && <p className="text-danger text-xs mb-3">{joinError}</p>}
+            <button
+              onClick={async () => {
+                if (joinCode.length !== 4) return;
+                setLoading(true);
+                try {
+                  await api.post('/family/circles/join', { code: joinCode });
+                  setShowJoin(false);
+                  setJoinCode('');
+                  fetchData();
+                } catch (err: any) {
+                  setJoinError(err.response?.data?.message || 'Codigo invalido');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              disabled={loading || joinCode.length !== 4}
+              className="btn-primary w-full disabled:opacity-40"
+            >
+              <Hash size={14} className="inline mr-1.5" />
+              {loading ? 'Entrando...' : 'Entrar no grupo'}
             </button>
           </div>
         </div>

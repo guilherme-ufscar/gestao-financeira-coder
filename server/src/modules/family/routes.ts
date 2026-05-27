@@ -7,6 +7,15 @@ import { sendCircleInviteEmail } from '../../lib/email.js';
 export async function familyRoutes(app: FastifyInstance) {
   app.addHook('preHandler', authenticate);
 
+  function generateJoinCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) {
+      code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return code;
+  }
+
   app.get('/circles', async (request) => {
     const userId = (request as any).userId;
     const memberships = await prisma.circleMember.findMany({
@@ -21,8 +30,10 @@ export async function familyRoutes(app: FastifyInstance) {
     const schema = z.object({ name: z.string().min(1) });
     const body = schema.parse(request.body);
 
+    const joinCode = generateJoinCode();
+
     const circle = await prisma.$transaction(async (tx) => {
-      const c = await tx.familyCircle.create({ data: { name: body.name, ownerId: userId } });
+      const c = await tx.familyCircle.create({ data: { name: body.name, ownerId: userId, joinCode } });
       await tx.circleMember.create({ data: { circleId: c.id, userId, role: 'admin' } });
       return c;
     });
@@ -106,6 +117,28 @@ export async function familyRoutes(app: FastifyInstance) {
 
     await prisma.circleInvite.update({ where: { id }, data: { status: 'rejected' } });
     return { message: 'Convite recusado' };
+  });
+
+  app.post('/circles/join', async (request, reply) => {
+    const userId = (request as any).userId;
+    const schema = z.object({ code: z.string().length(4) });
+    const body = schema.parse(request.body);
+
+    const circle = await prisma.familyCircle.findFirst({
+      where: { joinCode: body.code.toUpperCase() },
+    });
+    if (!circle) return reply.status(404).send({ message: 'Codigo invalido' });
+
+    const existing = await prisma.circleMember.findFirst({
+      where: { circleId: circle.id, userId },
+    });
+    if (existing) return reply.status(409).send({ message: 'Voce ja faz parte deste circulo' });
+
+    await prisma.circleMember.create({
+      data: { circleId: circle.id, userId, role: 'member' },
+    });
+
+    return { message: 'Entrou no circulo', circleName: circle.name };
   });
 
   app.get('/circles/:id/summary', async (request, reply) => {

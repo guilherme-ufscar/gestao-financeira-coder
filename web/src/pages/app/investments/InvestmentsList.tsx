@@ -141,7 +141,7 @@ export default function InvestmentsList() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowForm(false)} />
           <div className="relative glass-card-lg w-full max-w-md max-h-[85vh] overflow-y-auto p-6 m-4">
             <div className="flex items-center justify-between mb-4">

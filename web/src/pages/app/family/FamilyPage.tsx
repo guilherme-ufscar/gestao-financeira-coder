@@ -180,7 +180,7 @@ export default function FamilyPage() {
       )}
 
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowCreate(false)} />
           <div className="relative glass-card-lg w-full max-w-md p-6 m-4">
             <h2 className="text-lg font-bold text-text-primary mb-4">Novo circulo familiar</h2>
@@ -199,7 +199,7 @@ export default function FamilyPage() {
       )}
 
       {showInvite && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowInvite(false)} />
           <div className="relative glass-card-lg w-full max-w-md p-6 m-4">
             <h2 className="text-lg font-bold text-text-primary mb-2">Convidar membro</h2>

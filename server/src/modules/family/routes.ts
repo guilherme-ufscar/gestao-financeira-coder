@@ -22,6 +22,16 @@ export async function familyRoutes(app: FastifyInstance) {
       where: { userId },
       include: { circle: { include: { members: { include: { user: { select: { id: true, name: true, avatarUrl: true } } } } } } },
     });
+
+    // Generate joinCode for circles that don't have one
+    for (const m of memberships) {
+      if (!m.circle.joinCode) {
+        const code = generateJoinCode();
+        await prisma.familyCircle.update({ where: { id: m.circle.id }, data: { joinCode: code } });
+        m.circle.joinCode = code;
+      }
+    }
+
     return memberships.map((m) => m.circle);
   });
 
@@ -139,6 +149,17 @@ export async function familyRoutes(app: FastifyInstance) {
     });
 
     return { message: 'Entrou no circulo', circleName: circle.name };
+  });
+
+  app.delete('/circles/:id', async (request, reply) => {
+    const userId = (request as any).userId;
+    const { id } = request.params as { id: string };
+
+    const circle = await prisma.familyCircle.findFirst({ where: { id, ownerId: userId } });
+    if (!circle) return reply.status(403).send({ message: 'Apenas o criador pode excluir o circulo' });
+
+    await prisma.familyCircle.delete({ where: { id } });
+    return { message: 'Circulo excluido' };
   });
 
   app.get('/circles/:id/summary', async (request, reply) => {

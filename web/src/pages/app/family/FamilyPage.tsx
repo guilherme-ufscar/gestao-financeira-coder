@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
-import { Users, Plus, Mail, Check, X, Crown, UserPlus, TrendingUp, TrendingDown, Wallet, Copy, Hash } from 'lucide-react';
+import { Users, Plus, Mail, Check, X, Crown, UserPlus, TrendingUp, TrendingDown, Wallet, Copy, Hash, Trash2 } from 'lucide-react';
 import api from '../../../lib/api/client';
 import { formatCurrency } from '../../../lib/utils';
 
@@ -200,6 +200,21 @@ export default function FamilyPage() {
                   ))}
                 </div>
               </div>
+
+              <button
+                onClick={async () => {
+                  if (!confirm('Tem certeza que deseja excluir este circulo? Todos os membros serao removidos.')) return;
+                  try {
+                    await api.delete('/family/circles/' + selectedCircle.id);
+                    fetchData();
+                  } catch (err: any) {
+                    alert(err.response?.data?.message || 'Erro ao excluir');
+                  }
+                }}
+                className="w-full py-3 rounded-xl border border-danger/30 text-danger text-sm hover:bg-danger/10 transition-colors flex items-center justify-center gap-2"
+              >
+                <Trash2 size={14} /> Excluir circulo
+              </button>
             </div>
           )}
         </>

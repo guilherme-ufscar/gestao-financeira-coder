@@ -109,9 +109,6 @@ export default function SubscriptionsList() {
     );
     const name = existing.length > 0 ? `${service.name} - ${existing.length + 1}` : service.name;
     setValue('name', name);
-    if (service.slug) {
-      setValue('logoUrl', `https://svgl.app/library/${service.slug}.svg`);
-    }
     setSearch('');
   };
 
@@ -131,15 +128,6 @@ export default function SubscriptionsList() {
   const toggleActive = async (id: string, active: boolean) => {
     await api.put('/subscriptions/' + id, { active: !active });
     fetchData();
-  };
-
-  const getServiceLogo = (sub: any) => {
-    const service = knownServices.find((s) =>
-      sub.name.toLowerCase().includes(s.name.toLowerCase())
-    );
-    if (sub.logoUrl) return sub.logoUrl;
-    if (service?.slug) return `https://svgl.app/library/${service.slug}.svg`;
-    return null;
   };
 
   return (
@@ -164,22 +152,17 @@ export default function SubscriptionsList() {
 
       <div className="space-y-2">
         {subscriptions.map((sub) => {
-          const logoUrl = getServiceLogo(sub);
           const service = knownServices.find((s) => sub.name.toLowerCase().includes(s.name.toLowerCase()));
           const color = service?.color || '#6D5FFD';
 
           return (
             <div key={sub.id} className="glass-card p-4 flex items-center gap-3">
-              {logoUrl ? (
-                <img src={logoUrl} alt={sub.name} className="w-10 h-10 rounded-xl object-contain bg-white/10 p-1" />
-              ) : (
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold"
-                  style={{ backgroundColor: color }}
-                >
-                  {sub.name.slice(0, 2).toUpperCase()}
-                </div>
-              )}
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold"
+                style={{ backgroundColor: color }}
+              >
+                {sub.name.slice(0, 2).toUpperCase()}
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-text-primary truncate">{sub.name}</p>
                 <p className="text-[10px] text-text-tertiary">
@@ -232,13 +215,9 @@ export default function SubscriptionsList() {
                     className={'p-2 rounded-lg border border-border hover:border-primary text-center transition-colors' +
                       (watch('name')?.toLowerCase().includes(s.name.toLowerCase()) ? ' border-primary bg-primary/5' : '')}
                   >
-                    {s.slug ? (
-                      <img src={`https://svgl.app/library/${s.slug}.svg`} alt={s.name} className="w-6 h-6 mx-auto mb-1 rounded object-contain" />
-                    ) : (
-                      <div className="w-6 h-6 rounded mx-auto mb-1 text-white text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: s.color }}>
-                        {s.name.slice(0, 2)}
-                      </div>
-                    )}
+                    <div className="w-6 h-6 rounded mx-auto mb-1 text-white text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: s.color }}>
+                      {s.name.slice(0, 2)}
+                    </div>
                     <span className="text-[9px] text-text-secondary leading-tight line-clamp-1">{s.name}</span>
                   </button>
                 ))}

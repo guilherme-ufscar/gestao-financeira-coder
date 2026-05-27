@@ -60,67 +60,67 @@ export default function Register() {
   };
 
   return (
-    <div className="glass-card p-6">
-      <h1 className="text-xl font-bold text-center mb-6 text-text-primary">Criar conta</h1>
+    <div className="m3-card-elevated p-7 animate-fade-in-up">
+      <h1 className="text-headline text-center mb-8 text-text-primary">Criar conta</h1>
 
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
+        <div className="mb-5 p-4 rounded-xl bg-danger-container/30 border border-danger/20 text-danger text-sm">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div>
-          <label className="block text-sm text-text-secondary mb-1">Nome</label>
+          <label className="block text-label text-text-secondary mb-2 pl-1">Nome</label>
           <input
             type="text"
-            className="input-field"
+            className="m3-input"
             placeholder="Seu nome"
             {...register('name')}
           />
-          {errors.name && <p className="text-danger text-xs mt-1">{errors.name.message}</p>}
+          {errors.name && <p className="text-danger text-caption mt-2 pl-1">{errors.name.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm text-text-secondary mb-1">E-mail</label>
+          <label className="block text-label text-text-secondary mb-2 pl-1">E-mail</label>
           <input
             type="email"
-            className="input-field"
+            className="m3-input"
             placeholder="seu@email.com"
             {...register('email')}
           />
-          {errors.email && <p className="text-danger text-xs mt-1">{errors.email.message}</p>}
+          {errors.email && <p className="text-danger text-caption mt-2 pl-1">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm text-text-secondary mb-1">Senha</label>
+          <label className="block text-label text-text-secondary mb-2 pl-1">Senha</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
-              className="input-field pr-10"
+              className="m3-input pr-12"
               placeholder="Minimo 6 caracteres"
               {...register('password')}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          {errors.password && <p className="text-danger text-xs mt-1">{errors.password.message}</p>}
+          {errors.password && <p className="text-danger text-caption mt-2 pl-1">{errors.password.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm text-text-secondary mb-1">Confirmar senha</label>
+          <label className="block text-label text-text-secondary mb-2 pl-1">Confirmar senha</label>
           <input
             type="password"
-            className="input-field"
+            className="m3-input"
             placeholder="Repita a senha"
             {...register('confirmPassword')}
           />
-          {errors.confirmPassword && <p className="text-danger text-xs mt-1">{errors.confirmPassword.message}</p>}
+          {errors.confirmPassword && <p className="text-danger text-caption mt-2 pl-1">{errors.confirmPassword.message}</p>}
         </div>
 
         <Turnstile onSuccess={onTurnstileSuccess} />
@@ -128,16 +128,16 @@ export default function Register() {
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+          className="m3-btn w-full disabled:opacity-50"
         >
           <UserPlus size={18} />
           {loading ? 'Criando...' : 'Criar conta'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-text-secondary mt-6">
+      <p className="text-center text-body text-text-secondary mt-8">
         Ja tem conta?{' '}
-        <Link to="/login" className="text-primary hover:underline font-medium">
+        <Link to="/login" className="text-primary hover:underline font-semibold">
           Entrar
         </Link>
       </p>

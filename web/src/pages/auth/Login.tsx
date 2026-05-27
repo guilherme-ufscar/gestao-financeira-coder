@@ -40,7 +40,6 @@ export default function Login() {
   const checkBiometric = async () => {
     const available = await isBiometricAvailable();
     setBiometricAvailable(available);
-
     if (available && biometricEnabled && Capacitor.isNativePlatform()) {
       handleBiometricLogin();
     }
@@ -51,22 +50,15 @@ export default function Login() {
     setError('');
     try {
       const creds = await getCredentials();
-      if (!creds) {
-        setLoading(false);
-        return;
-      }
-
+      if (!creds) { setLoading(false); return; }
       const res = await api.post('/auth/refresh-biometric', {
         email: creds.email,
         refreshToken: creds.refreshToken,
       });
-
       setAuth(res.data.user, res.data.token);
-
       if (res.data.refreshToken) {
         await saveCredentials(creds.email, res.data.refreshToken);
       }
-
       navigate('/');
     } catch {
       setError('Sessao expirada. Faca login novamente.');
@@ -82,7 +74,6 @@ export default function Login() {
     try {
       const res = await api.post('/auth/login', data);
       setAuth(res.data.user, res.data.token);
-
       if (biometricAvailable && !biometricEnabled && Capacitor.isNativePlatform()) {
         setPendingEmail(data.email);
         setPendingRefreshToken(res.data.refreshToken || res.data.token);
@@ -99,37 +90,28 @@ export default function Login() {
 
   const handleEnableBiometric = async () => {
     const saved = await saveCredentials(pendingEmail, pendingRefreshToken);
-    if (saved) {
-      setBiometric(true);
-    }
-    navigate('/');
-  };
-
-  const handleSkipBiometric = () => {
+    if (saved) setBiometric(true);
     navigate('/');
   };
 
   if (showBiometricSetup) {
     return (
-      <div className="glass-card p-6 text-center">
-        <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center mx-auto mb-4">
-          <Fingerprint size={32} className="text-white" />
+      <div className="m3-card-elevated p-8 text-center animate-scale-in">
+        <div className="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center mx-auto mb-5">
+          <Fingerprint size={36} className="text-on-primary-container" />
         </div>
-        <h2 className="text-lg font-bold text-text-primary mb-2">Ativar login por digital?</h2>
-        <p className="text-sm text-text-secondary mb-6">
+        <h2 className="text-headline text-text-primary mb-2">Ativar login por digital?</h2>
+        <p className="text-body text-text-secondary mb-8">
           Nas proximas vezes, voce podera entrar usando apenas sua digital, sem precisar digitar a senha.
         </p>
         <div className="space-y-3">
-          <button
-            onClick={handleEnableBiometric}
-            className="btn-primary w-full flex items-center justify-center gap-2"
-          >
+          <button onClick={handleEnableBiometric} className="m3-btn w-full">
             <Fingerprint size={18} />
             Ativar digital
           </button>
           <button
-            onClick={handleSkipBiometric}
-            className="w-full py-3 text-sm text-text-secondary hover:text-text-primary transition-colors"
+            onClick={() => navigate('/')}
+            className="w-full py-3.5 text-sm text-text-secondary hover:text-text-primary transition-colors rounded-full"
           >
             Agora nao
           </button>
@@ -139,11 +121,11 @@ export default function Login() {
   }
 
   return (
-    <div className="glass-card p-6">
-      <h1 className="text-xl font-bold text-center mb-6 text-text-primary">Entrar</h1>
+    <div className="m3-card-elevated p-7 animate-fade-in-up">
+      <h1 className="text-headline text-center mb-8 text-text-primary">Entrar</h1>
 
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
+        <div className="mb-5 p-4 rounded-xl bg-danger-container/30 border border-danger/20 text-danger text-sm">
           {error}
         </div>
       )}
@@ -152,49 +134,49 @@ export default function Login() {
         <button
           onClick={handleBiometricLogin}
           disabled={loading}
-          className="w-full mb-4 py-4 rounded-xl border border-primary/30 bg-primary/5 flex flex-col items-center gap-2 hover:bg-primary/10 transition-colors disabled:opacity-50"
+          className="w-full mb-5 py-5 rounded-2xl border-2 border-primary/30 bg-primary-container/20 flex flex-col items-center gap-2.5 hover:bg-primary-container/30 transition-all duration-300 ease-spring disabled:opacity-50"
         >
-          <Fingerprint size={32} className="text-primary" />
-          <span className="text-sm text-primary font-medium">
+          <Fingerprint size={36} className="text-primary" />
+          <span className="text-sm text-primary font-semibold">
             {loading ? 'Verificando...' : 'Entrar com digital'}
           </span>
         </button>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div>
-          <label className="block text-sm text-text-secondary mb-1">E-mail</label>
+          <label className="block text-label text-text-secondary mb-2 pl-1">E-mail</label>
           <input
             type="email"
-            className="input-field"
+            className="m3-input"
             placeholder="seu@email.com"
             {...register('email')}
           />
-          {errors.email && <p className="text-danger text-xs mt-1">{errors.email.message}</p>}
+          {errors.email && <p className="text-danger text-caption mt-2 pl-1">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm text-text-secondary mb-1">Senha</label>
+          <label className="block text-label text-text-secondary mb-2 pl-1">Senha</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
-              className="input-field pr-10"
+              className="m3-input pr-12"
               placeholder="Sua senha"
               {...register('password')}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-colors"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          {errors.password && <p className="text-danger text-xs mt-1">{errors.password.message}</p>}
+          {errors.password && <p className="text-danger text-caption mt-2 pl-1">{errors.password.message}</p>}
         </div>
 
         <div className="text-right">
-          <Link to="/recuperar-senha" className="text-sm text-primary hover:underline">
+          <Link to="/recuperar-senha" className="text-label text-primary hover:underline">
             Esqueci minha senha
           </Link>
         </div>
@@ -202,16 +184,16 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+          className="m3-btn w-full disabled:opacity-50"
         >
           <LogIn size={18} />
           {loading ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-text-secondary mt-6">
+      <p className="text-center text-body text-text-secondary mt-8">
         Nao tem conta?{' '}
-        <Link to="/cadastro" className="text-primary hover:underline font-medium">
+        <Link to="/cadastro" className="text-primary hover:underline font-semibold">
           Criar conta
         </Link>
       </p>

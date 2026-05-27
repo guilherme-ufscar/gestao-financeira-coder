@@ -36,13 +36,15 @@ export default function ForgotPassword() {
 
   if (sent) {
     return (
-      <div className="glass-card p-6 text-center">
-        <Mail size={48} className="mx-auto mb-4 text-primary" />
-        <h1 className="text-xl font-bold mb-2 text-text-primary">E-mail enviado</h1>
-        <p className="text-text-secondary text-sm mb-6">
+      <div className="m3-card-elevated p-8 text-center animate-spring-pop">
+        <div className="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center mx-auto mb-5">
+          <Mail size={36} className="text-on-primary-container" />
+        </div>
+        <h1 className="text-headline mb-3 text-text-primary">E-mail enviado</h1>
+        <p className="text-body text-text-secondary mb-8">
           Verifique sua caixa de entrada para redefinir sua senha.
         </p>
-        <Link to="/login" className="text-primary hover:underline font-medium text-sm">
+        <Link to="/login" className="m3-btn-text text-label-lg">
           Voltar ao login
         </Link>
       </div>
@@ -50,42 +52,42 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="glass-card p-6">
-      <h1 className="text-xl font-bold text-center mb-2 text-text-primary">Recuperar senha</h1>
-      <p className="text-text-secondary text-sm text-center mb-6">
+    <div className="m3-card-elevated p-7 animate-fade-in-up">
+      <h1 className="text-headline text-center mb-2 text-text-primary">Recuperar senha</h1>
+      <p className="text-body text-text-secondary text-center mb-8">
         Informe seu e-mail para receber o link de recuperacao.
       </p>
 
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm">
+        <div className="mb-5 p-4 rounded-xl bg-danger-container/30 border border-danger/20 text-danger text-sm">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div>
-          <label className="block text-sm text-text-secondary mb-1">E-mail</label>
+          <label className="block text-label text-text-secondary mb-2 pl-1">E-mail</label>
           <input
             type="email"
-            className="input-field"
+            className="m3-input"
             placeholder="seu@email.com"
             {...register('email')}
           />
-          {errors.email && <p className="text-danger text-xs mt-1">{errors.email.message}</p>}
+          {errors.email && <p className="text-danger text-caption mt-2 pl-1">{errors.email.message}</p>}
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+          className="m3-btn w-full disabled:opacity-50"
         >
           <Mail size={18} />
           {loading ? 'Enviando...' : 'Enviar link'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-text-secondary mt-6">
-        <Link to="/login" className="text-primary hover:underline font-medium">
+      <p className="text-center text-body text-text-secondary mt-8">
+        <Link to="/login" className="text-primary hover:underline font-semibold">
           Voltar ao login
         </Link>
       </p>

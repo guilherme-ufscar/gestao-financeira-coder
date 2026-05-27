@@ -58,7 +58,12 @@ export async function familyRoutes(app: FastifyInstance) {
     const circle = await prisma.familyCircle.findFirst({ where: { id, ownerId: userId } });
     if (!circle) return reply.status(403).send({ message: 'Apenas o criador pode excluir o circulo' });
 
-    await prisma.familyCircle.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      await tx.circleInvite.deleteMany({ where: { circleId: id } });
+      await tx.circleMember.deleteMany({ where: { circleId: id } });
+      await tx.familyCircle.delete({ where: { id } });
+    });
+
     return { message: 'Circulo excluido' };
   });
 

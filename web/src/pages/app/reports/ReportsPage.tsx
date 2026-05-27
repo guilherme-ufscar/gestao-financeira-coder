@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 import api from '../../../lib/api/client';
@@ -10,14 +10,11 @@ export default function ReportsPage() {
   const [period, setPeriod] = useState(6);
   const [totals, setTotals] = useState({ income: 0, expenses: 0 });
 
-  useEffect(() => {
-    fetchData();
-  }, [period]);
+  useEffect(() => { fetchData(); }, [period]);
 
   const fetchData = async () => {
     const now = new Date();
     const months: any[] = [];
-
     for (let i = period - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const start = d.toISOString();
@@ -46,7 +43,7 @@ export default function ReportsPage() {
     const catMap: Record<string, { name: string; color: string; value: number }> = {};
     currentTxs.filter((t: any) => t.type === 'expense').forEach((t: any) => {
       const name = t.category?.name || 'Outros';
-      const color = t.category?.color || '#636E72';
+      const color = t.category?.color || '#C9BFD6';
       if (!catMap[name]) catMap[name] = { name, color, value: 0 };
       catMap[name].value += t.amountInCents;
     });
@@ -56,16 +53,13 @@ export default function ReportsPage() {
   const totalCatSpending = categoryData.reduce((s, c) => s + c.value, 0);
 
   return (
-    <div className="p-4 space-y-5">
+    <div className="p-5 space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-text-primary">Relatorios</h1>
-        <div className="flex gap-1.5">
+        <h1 className="text-headline text-text-primary">Relatorios</h1>
+        <div className="flex gap-2">
           {[3, 6, 12].map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={'chip ' + (period === p ? 'chip-active' : '')}
-            >
+            <button key={p} onClick={() => setPeriod(p)}
+              className={'m3-chip ' + (period === p ? 'm3-chip-selected' : '')}>
               {p}m
             </button>
           ))}
@@ -73,100 +67,86 @@ export default function ReportsPage() {
       </header>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
-              <TrendingUp size={14} className="text-success" />
-            </div>
+        <div className="m3-card-elevated p-5">
+          <div className="w-10 h-10 rounded-xl bg-success/15 flex items-center justify-center mb-3">
+            <TrendingUp size={18} className="text-success" />
           </div>
-          <p className="text-[10px] text-text-tertiary uppercase">Receitas (mes)</p>
-          <p className="text-base font-bold text-success">{formatCurrency(totals.income)}</p>
+          <p className="text-caption text-text-tertiary uppercase">Receitas (mes)</p>
+          <p className="text-title font-bold text-success">{formatCurrency(totals.income)}</p>
         </div>
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-danger/10 flex items-center justify-center">
-              <TrendingDown size={14} className="text-danger" />
-            </div>
+        <div className="m3-card-elevated p-5">
+          <div className="w-10 h-10 rounded-xl bg-danger/15 flex items-center justify-center mb-3">
+            <TrendingDown size={18} className="text-danger" />
           </div>
-          <p className="text-[10px] text-text-tertiary uppercase">Despesas (mes)</p>
-          <p className="text-base font-bold text-danger">{formatCurrency(totals.expenses)}</p>
+          <p className="text-caption text-text-tertiary uppercase">Despesas (mes)</p>
+          <p className="text-title font-bold text-danger">{formatCurrency(totals.expenses)}</p>
         </div>
       </div>
 
-      <div className="glass-card p-4">
-        <div className="section-header">
-          <h2 className="section-title">Evolucao mensal</h2>
-          <Calendar size={14} className="text-text-tertiary" />
+      <div className="m3-card-elevated p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-title text-text-primary">Evolucao mensal</h2>
+          <Calendar size={16} className="text-text-tertiary" />
         </div>
-        <div className="h-44">
+        <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyData} barGap={2}>
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }} axisLine={false} tickLine={false} />
+            <BarChart data={monthlyData} barGap={4}>
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--m3-outline)' }} axisLine={false} tickLine={false} />
               <YAxis hide />
               <Tooltip
-                contentStyle={{ background: 'var(--color-surface-solid)', border: '1px solid var(--color-border)', borderRadius: 12, fontSize: 11 }}
-                labelStyle={{ color: 'var(--color-text-primary)' }}
+                contentStyle={{ background: 'var(--m3-surface-container-high)', border: '1px solid var(--m3-outline-variant)', borderRadius: 16, fontSize: 12 }}
+                labelStyle={{ color: 'var(--m3-on-surface)' }}
                 formatter={(value: number) => ['R$ ' + value.toFixed(2)]}
               />
-              <Bar dataKey="receitas" fill="var(--color-success)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="despesas" fill="var(--color-danger)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="receitas" fill="var(--m3-success)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="despesas" fill="var(--m3-danger)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex items-center justify-center gap-4 mt-2">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-success" />
-            <span className="text-[10px] text-text-secondary">Receitas</span>
+        <div className="flex items-center justify-center gap-5 mt-3">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-success" />
+            <span className="text-caption text-text-secondary">Receitas</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-danger" />
-            <span className="text-[10px] text-text-secondary">Despesas</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-danger" />
+            <span className="text-caption text-text-secondary">Despesas</span>
           </div>
         </div>
       </div>
 
-      <div className="glass-card p-4">
-        <div className="section-header">
-          <h2 className="section-title">Gastos por categoria</h2>
-          <span className="text-xs text-text-tertiary">Este mes</span>
+      <div className="m3-card-elevated p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-title text-text-primary">Gastos por categoria</h2>
+          <span className="text-label text-text-tertiary">Este mes</span>
         </div>
         {categoryData.length === 0 ? (
-          <p className="text-text-tertiary text-sm text-center py-4">Sem dados para exibir</p>
+          <p className="text-text-tertiary text-body text-center py-6">Sem dados para exibir</p>
         ) : (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             <div className="w-28 h-28 flex-shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
-                    data={categoryData}
-                    dataKey="value"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={30}
-                    outerRadius={50}
-                    strokeWidth={0}
-                  >
-                    {categoryData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
+                  <Pie data={categoryData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={52} strokeWidth={0}>
+                    {categoryData.map((entry, i) => (<Cell key={i} fill={entry.color} />))}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex-1 space-y-2">
+            <div className="flex-1 space-y-2.5">
               {categoryData.map((cat) => {
                 const percent = totalCatSpending > 0 ? (cat.value / totalCatSpending) * 100 : 0;
                 return (
                   <div key={cat.name}>
-                    <div className="flex items-center justify-between mb-0.5">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
-                        <span className="text-[11px] text-text-secondary">{cat.name}</span>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                        <span className="text-label text-text-secondary">{cat.name}</span>
                       </div>
-                      <span className="text-[11px] font-medium text-text-primary">{percent.toFixed(0)}%</span>
+                      <span className="text-label font-bold text-text-primary">{percent.toFixed(0)}%</span>
                     </div>
-                    <div className="w-full h-1 rounded-full bg-surface">
-                      <div className="h-full rounded-full" style={{ width: percent + '%', backgroundColor: cat.color }} />
+                    <div className="w-full h-1.5 rounded-full bg-surface-highest">
+                      <div className="h-full rounded-full transition-all duration-500" style={{ width: percent + '%', backgroundColor: cat.color }} />
                     </div>
                   </div>
                 );

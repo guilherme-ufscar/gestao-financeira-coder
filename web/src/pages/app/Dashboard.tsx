@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Building2, CreditCard, PieChart, Target, Repeat, ChevronRight, Eye, EyeOff, CalendarClock, Wallet, ArrowRightLeft, Plus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Building2, CreditCard, PieChart, Target, Repeat, ChevronRight, Eye, EyeOff, CalendarClock, Wallet, ArrowRightLeft, Plus, Users } from 'lucide-react';
 import { PieChart as RechartsPie, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '../../lib/utils';
 import { useAuthStore } from '../../lib/store/auth';
@@ -16,6 +16,19 @@ export default function Dashboard() {
   const [categorySpending, setCategorySpending] = useState<any[]>([]);
   const [showBalance, setShowBalance] = useState(true);
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<'personal' | 'family'>('personal');
+  const [circles, setCircles] = useState<any[]>([]);
+  const [familySummary, setFamilySummary] = useState<any>(null);
+
+  useEffect(() => {
+    api.get('/family/circles').then((r) => setCircles(r.data)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (viewMode === 'family' && circles.length > 0) {
+      api.get('/family/circles/' + circles[0].id + '/summary').then((r) => setFamilySummary(r.data));
+    }
+  }, [viewMode, circles]);
 
   useEffect(() => {
     api.get('/accounts').then((r) => setAccounts(r.data));
@@ -49,8 +62,14 @@ export default function Dashboard() {
     });
   }, []);
 
-  const totalBalance = accounts.reduce((sum, a) => sum + a.balanceInCents, 0);
-  const balance = monthSummary.income - monthSummary.expenses;
+  const totalBalance = viewMode === 'family' && familySummary
+    ? familySummary.totalBalance || 0
+    : accounts.reduce((sum, a) => sum + a.balanceInCents, 0);
+  const balance = viewMode === 'family' && familySummary
+    ? (familySummary.monthIncome || 0) - (familySummary.monthExpenses || 0)
+    : monthSummary.income - monthSummary.expenses;
+  const displayIncome = viewMode === 'family' && familySummary ? familySummary.monthIncome || 0 : monthSummary.income;
+  const displayExpenses = viewMode === 'family' && familySummary ? familySummary.monthExpenses || 0 : monthSummary.expenses;
   const totalSubsMonthly = subscriptions.filter(s => s.active).reduce((sum, s) => {
     if (s.cycle === 'yearly') return sum + Math.round(s.amountInCents / 12);
     if (s.cycle === 'weekly') return sum + s.amountInCents * 4;
@@ -64,15 +83,34 @@ export default function Dashboard() {
           <p className="text-text-tertiary text-xs">Ola,</p>
           <h1 className="text-lg font-bold text-text-primary">{user?.name || 'Bem-vindo'}</h1>
         </div>
-        <button
-          onClick={() => navigate('/configuracoes')}
-          className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow"
-        >
-          <span className="text-white text-sm font-bold">
-            {(user?.name || 'U')[0].toUpperCase()}
-          </span>
-        </button>
+        <div className="flex items-center gap-2">
+          {circles.length > 0 && (
+            <button
+              onClick={() => setViewMode(viewMode === 'personal' ? 'family' : 'personal')}
+              className={'w-10 h-10 rounded-full flex items-center justify-center transition-colors ' +
+                (viewMode === 'family' ? 'bg-primary/15 border-2 border-primary/40' : 'glass-card')}
+              title={viewMode === 'personal' ? 'Ver familia' : 'Ver pessoal'}
+            >
+              <Users size={16} className={viewMode === 'family' ? 'text-primary' : 'text-text-tertiary'} />
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/configuracoes')}
+            className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-glow"
+          >
+            <span className="text-white text-sm font-bold">
+              {(user?.name || 'U')[0].toUpperCase()}
+            </span>
+          </button>
+        </div>
       </header>
+
+      {viewMode === 'family' && circles.length > 0 && (
+        <div className="glass-card p-3 flex items-center gap-2 animate-fade-in-up">
+          <Users size={14} className="text-primary" />
+          <span className="text-xs text-text-secondary">Visualizando: <span className="font-semibold text-primary">{circles[0].name}</span></span>
+        </div>
+      )}
 
       <section>
         <div className="glass-card-gradient card-glow p-5">
@@ -89,12 +127,12 @@ export default function Dashboard() {
             <div className="bg-success/10 rounded-xl p-2.5 text-center">
               <TrendingUp size={14} className="text-success mx-auto mb-1" />
               <p className="text-[10px] text-text-tertiary">Receitas</p>
-              <p className="text-xs font-bold text-success">{showBalance ? formatCurrency(monthSummary.income) : '••••'}</p>
+              <p className="text-xs font-bold text-success">{showBalance ? formatCurrency(displayIncome) : '••••'}</p>
             </div>
             <div className="bg-danger/10 rounded-xl p-2.5 text-center">
               <TrendingDown size={14} className="text-danger mx-auto mb-1" />
               <p className="text-[10px] text-text-tertiary">Despesas</p>
-              <p className="text-xs font-bold text-danger">{showBalance ? formatCurrency(monthSummary.expenses) : '••••'}</p>
+              <p className="text-xs font-bold text-danger">{showBalance ? formatCurrency(displayExpenses) : '••••'}</p>
             </div>
             <div className="bg-primary/10 rounded-xl p-2.5 text-center">
               <Wallet size={14} className="text-primary mx-auto mb-1" />

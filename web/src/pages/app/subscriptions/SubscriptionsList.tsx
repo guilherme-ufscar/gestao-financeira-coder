@@ -49,6 +49,8 @@ export default function SubscriptionsList() {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [customMode, setCustomMode] = useState(false);
+  const [customColor, setCustomColor] = useState('#6D5FFD');
 
   const fetchData = async () => {
     const [subs, accs] = await Promise.all([
@@ -117,6 +119,8 @@ export default function SubscriptionsList() {
     try {
       await api.post('/subscriptions', data);
       setShowForm(false);
+      setCustomMode(false);
+      setSearch('');
       reset();
       fetchData();
     } catch {
@@ -186,42 +190,86 @@ export default function SubscriptionsList() {
 
       {showForm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setShowForm(false)} />
+          <div className="absolute inset-0 bg-black/60" onClick={() => { setShowForm(false); setCustomMode(false); setSearch(''); }} />
           <div className="relative glass-card-lg w-full max-w-md max-h-[85vh] overflow-y-auto p-6 m-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-text-primary">Nova assinatura</h2>
-              <button onClick={() => setShowForm(false)} className="text-text-tertiary hover:text-text-primary">
+              <button onClick={() => { setShowForm(false); setCustomMode(false); setSearch(''); }} className="text-text-tertiary hover:text-text-primary">
                 <X size={20} />
               </button>
             </div>
 
             <div className="mb-4">
-              <div className="relative mb-3">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
-                <input
-                  type="text"
-                  className="input-field pl-9"
-                  placeholder="Buscar servico..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto">
-                {filteredServices.map((s) => (
+              {!customMode ? (
+                <>
+                  <div className="relative mb-3">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+                    <input
+                      type="text"
+                      className="input-field pl-9"
+                      placeholder="Buscar servico..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto">
+                    {filteredServices.map((s) => (
+                      <button
+                        key={s.name}
+                        type="button"
+                        onClick={() => selectService(s)}
+                        className={'p-2 rounded-lg border border-border hover:border-primary text-center transition-colors' +
+                          (watch('name')?.toLowerCase().includes(s.name.toLowerCase()) ? ' border-primary bg-primary/5' : '')}
+                      >
+                        <div className="w-6 h-6 rounded mx-auto mb-1 text-white text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: s.color }}>
+                          {s.name.slice(0, 2)}
+                        </div>
+                        <span className="text-[9px] text-text-secondary leading-tight line-clamp-1">{s.name}</span>
+                      </button>
+                    ))}
+                  </div>
                   <button
-                    key={s.name}
                     type="button"
-                    onClick={() => selectService(s)}
-                    className={'p-2 rounded-lg border border-border hover:border-primary text-center transition-colors' +
-                      (watch('name')?.toLowerCase().includes(s.name.toLowerCase()) ? ' border-primary bg-primary/5' : '')}
+                    onClick={() => setCustomMode(true)}
+                    className="w-full mt-3 py-2 text-xs text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
                   >
-                    <div className="w-6 h-6 rounded mx-auto mb-1 text-white text-[8px] font-bold flex items-center justify-center" style={{ backgroundColor: s.color }}>
-                      {s.name.slice(0, 2)}
-                    </div>
-                    <span className="text-[9px] text-text-secondary leading-tight line-clamp-1">{s.name}</span>
+                    Personalizada (nao esta na lista)
                   </button>
-                ))}
-              </div>
+                </>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-text-tertiary mb-1">Nome do servico</label>
+                    <input
+                      className="input-field"
+                      placeholder="Ex: Minha academia"
+                      onChange={(e) => setValue('name', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-text-tertiary mb-1">Cor</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={customColor}
+                        onChange={(e) => setCustomColor(e.target.value)}
+                        className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+                      />
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: customColor }}>
+                        {(watch('name') || '??').slice(0, 2).toUpperCase()}
+                      </div>
+                      <span className="text-xs text-text-tertiary">Pre-visualizacao</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setCustomMode(false); setSearch(''); }}
+                    className="text-xs text-text-tertiary hover:text-text-primary"
+                  >
+                    Voltar para lista
+                  </button>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
